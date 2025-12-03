@@ -1,0 +1,273 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+header {
+    background: #007bff;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 5px;
+}
+
+header p {
+    opacity: 0.9;
+    font-size: 1.1em;
+}
+
+.form {
+    padding: 30px;
+    background: #f8f9fa;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+#submitBtn {
+    flex: 1;
+    background: #28a745;
+    color: white;
+}
+
+#submitBtn:hover {
+    background: #218838;
+}
+
+#cancelBtn {
+    background: #6c757d;
+    color: white;
+    flex: 0 0 auto;
+}
+
+#cancelBtn:hover {
+    background: #5a6268;
+}
+
+.filters {
+    padding: 0 30px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.filters label {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: 600;
+}
+
+.filters select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+}
+
+.expenses-list {
+    padding: 30px;
+}
+
+.expenses-list h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+#groupedList {
+    margin-bottom: 20px;
+}
+
+.day-group {
+    margin-bottom: 25px;
+}
+
+.day-header {
+    background: #e9ecef;
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #495057;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expense-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    transition: box-shadow 0.3s;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.expense-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.expense-item .details {
+    font-size: 14px;
+}
+
+.expense-item .details strong {
+    color: #007bff;
+}
+
+.expense-item .category {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: #212529;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}
+
+.total {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: right;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #28a745;
+}
+
+.total.warning {
+    color: #dc3545;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        border-radius: 0;
+    }
+
+    header {
+        padding: 20px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    .form,
+    .expenses-list {
+        padding: 20px;
+    }
+
+    .expense-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: left;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .day-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
