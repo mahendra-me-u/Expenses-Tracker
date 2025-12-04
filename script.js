@@ -63,7 +63,7 @@ function renderExpenses() {
     const filteredEntries = Object.entries(allExpenses)
         .filter(([id, expense]) => !filter || expense.category === filter)
         .sort(([id1, exp1], [id2, exp2]) => new Date(exp2.date) - new Date(exp1.date)); // Newest first
-    
+
     // Group by date
     const grouped = {};
     filteredEntries.forEach(([id, expense]) => {
@@ -73,25 +73,25 @@ function renderExpenses() {
         }
         grouped[dateKey].push({ id, ...expense });
     });
-    
+
     groupedList.innerHTML = '';
     let overallTotal = 0;
-    
+
     // Render each day group
     Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(dateKey => { // Sort dates descending
         const dayExpenses = grouped[dateKey];
         let dayTotal = 0;
         let dayIncludedCount = 0; // For count only included
-        
+
         // Day header with subtotal (only included expenses)
         const dayHeader = document.createElement('div');
         dayHeader.className = 'day-header';
         dayHeader.innerHTML = `
-            <span>\( {new Date(dateKey).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ( \){dayExpenses.length} expenses)</span>
+            <span>${new Date(dateKey).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${dayExpenses.length} expenses)</span>
             <span>Day Total: ${formatINR(0)}</span> <!-- Placeholder, updated below -->
         `;
         groupedList.appendChild(dayHeader);
-        
+
         // Expenses for the day
         dayExpenses.forEach(({ id, ...expense }) => {
             const includeInTotal = shouldIncludeInTotal(expense);
@@ -99,8 +99,8 @@ function renderExpenses() {
             div.className = `expense-item ${!includeInTotal ? 'excluded' : ''}`;
             div.innerHTML = `
                 <div class="details">
-                    <strong>\( {expense.description}</strong> - \){formatINR(expense.amount)} 
-                    <span class="category">\( {expense.category}</span> on \){expense.date}
+                    <strong>${expense.description}</strong> - ${formatINR(expense.amount)}
+                    <span class="category">${expense.category}</span> on ${expense.date}
                     ${!includeInTotal ? '<span style="color: #ffc107; font-style: italic;"> (Excluded from totals)</span>' : ''}
                 </div>
                 <div>
@@ -109,18 +109,18 @@ function renderExpenses() {
                 </div>
             `;
             groupedList.appendChild(div);
-            
+
             if (includeInTotal) {
                 dayTotal += parseFloat(expense.amount);
                 dayIncludedCount++;
             }
         });
-        
+
         // Update day header with actual subtotal (only included)
         dayHeader.lastElementChild.textContent = `Day Total: ${formatINR(dayTotal)}`;
         overallTotal += dayTotal;
     });
-    
+
     // Overall total (only included)
     totalEl.innerHTML = `Overall Total: ${formatINR(overallTotal)}`;
     totalEl.classList.toggle('warning', overallTotal > 100000); // Warning over ₹1,00,000
@@ -134,20 +134,20 @@ form.addEventListener('submit', (e) => {
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
     const excludeFromTotal = excludeCheckbox.checked; // New: Capture checkbox
-    
+
     if (amount <= 0) {
         alert('Amount must be positive!');
         return;
     }
-    
-    const expenseData = { 
-        description, 
-        amount, 
-        category, 
+
+    const expenseData = {
+        description,
+        amount,
+        category,
         date,
         excludeFromTotal // New: Save to Firebase
     };
-    
+
     if (editingId) {
         // Update existing
         update(ref(db, `expenses/${editingId}`), expenseData);
@@ -159,7 +159,7 @@ form.addEventListener('submit', (e) => {
         // Add new
         push(expensesRef, expenseData);
     }
-    
+
     form.reset();
     excludeCheckbox.checked = false; // Reset checkbox
 });
