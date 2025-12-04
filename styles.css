@@ -73,7 +73,8 @@ label {
     color: #333;
 }
 
-input, select {
+input,
+select {
     width: 100%;
     padding: 12px;
     border: 2px solid #ddd;
@@ -82,7 +83,8 @@ input, select {
     transition: border-color 0.3s;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
     outline: none;
     border-color: #007bff;
 }
@@ -230,7 +232,8 @@ button {
     margin-left: 10px;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
     padding: 6px 12px;
     font-size: 14px;
     margin-left: 5px;
@@ -269,8 +272,15 @@ button {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsive */
@@ -279,40 +289,41 @@ button {
         margin: 10px;
         border-radius: 0;
     }
-    
+
     header {
         padding: 20px;
     }
-    
+
     header h1 {
         font-size: 2em;
     }
-    
-    .form, .expenses-list {
+
+    .form,
+    .expenses-list {
         padding: 20px;
     }
-    
+
     .expense-item {
         grid-template-columns: 1fr;
         gap: 10px;
         text-align: left;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }
-    
+
     .day-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 5px;
     }
-    
+
     .filters {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .filters select {
         min-width: auto;
     }
