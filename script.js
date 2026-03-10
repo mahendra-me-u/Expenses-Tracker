@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
 import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -19,6 +20,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 // References
 const expensesRef = ref(db, 'expenses');
@@ -28,12 +31,57 @@ const totalEl = document.getElementById('total');
 const submitBtn = document.getElementById('submitBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const filterCategory = document.getElementById('filterCategory');
-const includeExcluded = document.getElementById('includeExcluded'); // New: Toggle ref
+const includeExcluded = document.getElementById('includeExcluded');
+// New: Toggle ref
 const editIdInput = document.getElementById('editId');
-const excludeCheckbox = document.getElementById('excludeFromTotal'); // New: Checkbox ref
-
+const excludeCheckbox = document.getElementById('excludeFromTotal');
+// Login / Logout UI references
+const loginScreen = document.getElementById("loginScreen");
+const appContainer = document.getElementById("appContainer");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+// New: Checkbox ref
 let editingId = null;
 let allExpenses = {}; // Store all expenses for filtering
+
+googleLoginBtn.addEventListener("click", async () => {
+    try {
+        await signInWithPopup(auth, provider);
+    } catch (error) {
+        alert(error.message);
+        console.error(error);
+    }
+});
+
+logoutBtn.addEventListener("click", () => {
+    signOut(auth);
+});
+
+onAuthStateChanged(auth, (user) => {
+
+    if (user) {
+
+        loginScreen.style.display = "none";
+        appContainer.style.display = "block";
+
+        console.log("Logged in:", user.email);
+
+        // Start database listener AFTER login
+        onValue(expensesRef, (snapshot) => {
+            const data = snapshot.val();
+            allExpenses = data || {};
+            renderExpenses();
+        });
+
+    } else {
+
+        loginScreen.style.display = "flex";
+        appContainer.style.display = "none";
+
+    }
+
+});
+
 
 // Format amount to INR
 function formatINR(amount) {
@@ -49,13 +97,6 @@ function shouldIncludeInTotal(expense) {
     const exclude = expense.excludeFromTotal || false; // Default false for old data
     return !exclude || includeExcluded.checked;
 }
-
-// Listen for changes in the database
-onValue(expensesRef, (snapshot) => {
-    const data = snapshot.val();
-    allExpenses = data || {};
-    renderExpenses();
-});
 
 // Render expenses (filtered, grouped by date, sorted newest first)
 function renderExpenses() {
