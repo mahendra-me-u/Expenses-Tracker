@@ -64,7 +64,7 @@ onAuthStateChanged(auth, (user) => {
         loginScreen.style.display = "none";
         appContainer.style.display = "block";
 
-        console.log("Logged in:", user.email);
+        console.log("UID:", user.uid);
 
         // Start database listener AFTER login
         onValue(expensesRef, (snapshot) => {
