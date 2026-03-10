@@ -1,16 +1,16 @@
-// Import the functions you need from the SDKs you need
+// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
 import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-// Your web app's Firebase configuration
+// Firebase config
 const firebaseConfig = {
-    apiKey: "AIzaSyAR8V6aQGy0mzg5DtgToqtVbv7w-wR724o",
+    apiKey: "YOUR_API_KEY",
     authDomain: "expenses-tracker-50131.firebaseapp.com",
     databaseURL: "https://expenses-tracker-50131-default-rtdb.firebaseio.com",
     projectId: "expenses-tracker-50131",
-    storageBucket: "expenses-tracker-50131.firebasestorage.app",
+    storageBucket: "expenses-tracker-50131.appspot.com",
     messagingSenderId: "339264912432",
     appId: "1:339264912432:web:0099f196b3b03f84cb81f5",
     measurementId: "G-QEBCHXY4EV"
@@ -23,8 +23,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// References
-const expensesRef = ref(db, 'expenses');
+// UI references
 const form = document.getElementById('expenseForm');
 const groupedList = document.getElementById('groupedList');
 const totalEl = document.getElementById('total');
@@ -32,41 +31,47 @@ const submitBtn = document.getElementById('submitBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const filterCategory = document.getElementById('filterCategory');
 const includeExcluded = document.getElementById('includeExcluded');
-// New: Toggle ref
 const editIdInput = document.getElementById('editId');
 const excludeCheckbox = document.getElementById('excludeFromTotal');
-// Login / Logout UI references
+
 const loginScreen = document.getElementById("loginScreen");
 const appContainer = document.getElementById("appContainer");
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-// New: Checkbox ref
-let editingId = null;
-let allExpenses = {}; // Store all expenses for filtering
 
+let expensesRef;
+let editingId = null;
+let allExpenses = {};
+let expenseChart;
+
+// LOGIN
 googleLoginBtn.addEventListener("click", async () => {
     try {
         await signInWithPopup(auth, provider);
     } catch (error) {
         alert(error.message);
-        console.error(error);
     }
 });
 
+// LOGOUT
 logoutBtn.addEventListener("click", () => {
     signOut(auth);
 });
 
+// AUTH STATE
 onAuthStateChanged(auth, (user) => {
+
+    const userEmail = document.getElementById("userEmail");
 
     if (user) {
 
         loginScreen.style.display = "none";
         appContainer.style.display = "block";
 
-        console.log("UID:", user.uid);
+        userEmail.textContent = user.email;
 
-        // Start database listener AFTER login
+        expensesRef = ref(db, 'users/' + user.uid + '/expenses');
+
         onValue(expensesRef, (snapshot) => {
             const data = snapshot.val();
             allExpenses = data || {};
@@ -82,168 +87,253 @@ onAuthStateChanged(auth, (user) => {
 
 });
 
-
-// Format amount to INR
+// FORMAT INR
 function formatINR(amount) {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 2
-    }).format(amount).replace('₹', '₹'); // Ensure ₹ symbol
+        currency: 'INR'
+    }).format(amount);
 }
 
-// Check if expense should be included in totals
+// TOTAL INCLUDE CHECK
 function shouldIncludeInTotal(expense) {
-    const exclude = expense.excludeFromTotal || false; // Default false for old data
+    const exclude = expense.excludeFromTotal || false;
     return !exclude || includeExcluded.checked;
 }
 
-// Render expenses (filtered, grouped by date, sorted newest first)
+// RENDER EXPENSES
 function renderExpenses() {
+
     const filter = filterCategory.value;
+
     const filteredEntries = Object.entries(allExpenses)
         .filter(([id, expense]) => !filter || expense.category === filter)
-        .sort(([id1, exp1], [id2, exp2]) => new Date(exp2.date) - new Date(exp1.date)); // Newest first
+        .sort(([id1, exp1], [id2, exp2]) => new Date(exp2.date) - new Date(exp1.date));
 
-    // Group by date
     const grouped = {};
+
     filteredEntries.forEach(([id, expense]) => {
+
         const dateKey = expense.date;
-        if (!grouped[dateKey]) {
-            grouped[dateKey] = [];
-        }
+
+        if (!grouped[dateKey]) grouped[dateKey] = [];
+
         grouped[dateKey].push({ id, ...expense });
+
     });
 
     groupedList.innerHTML = '';
+
     let overallTotal = 0;
 
-    // Render each day group
-    Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(dateKey => { // Sort dates descending
-        const dayExpenses = grouped[dateKey];
-        let dayTotal = 0;
-        let dayIncludedCount = 0; // For count only included
+    Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(dateKey => {
 
-        // Day header with subtotal (only included expenses)
+        const dayExpenses = grouped[dateKey];
+
+        let dayTotal = 0;
+
         const dayHeader = document.createElement('div');
+
         dayHeader.className = 'day-header';
+
         dayHeader.innerHTML = `
-            <span>${new Date(dateKey).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${dayExpenses.length} expenses)</span>
-            <span>Day Total: ${formatINR(0)}</span> <!-- Placeholder, updated below -->
+        <span>${new Date(dateKey).toLocaleDateString('en-IN')}</span>
+        <span>Day Total: ${formatINR(0)}</span>
         `;
+
         groupedList.appendChild(dayHeader);
 
-        // Expenses for the day
         dayExpenses.forEach(({ id, ...expense }) => {
+
             const includeInTotal = shouldIncludeInTotal(expense);
+
             const div = document.createElement('div');
+
             div.className = `expense-item ${!includeInTotal ? 'excluded' : ''}`;
+
             div.innerHTML = `
-                <div class="details">
-                    <strong>${expense.description}</strong> - ${formatINR(expense.amount)}
-                    <span class="category">${expense.category}</span> on ${expense.date}
-                    ${!includeInTotal ? '<span style="color: #ffc107; font-style: italic;"> (Excluded from totals)</span>' : ''}
-                </div>
-                <div>
-                    <button class="edit-btn" onclick="editExpense('${id}')">Edit</button>
-                    <button class="delete-btn" onclick="deleteExpense('${id}')">Delete</button>
-                </div>
+            <div class="details">
+            <strong>${expense.description}</strong>
+            - ${formatINR(expense.amount)}
+            <span class="category">${expense.category}</span>
+            </div>
+            <div>
+            <button onclick="editExpense('${id}')">Edit</button>
+            <button onclick="deleteExpense('${id}')">Delete</button>
+            </div>
             `;
+
             groupedList.appendChild(div);
 
             if (includeInTotal) {
-                dayTotal += parseFloat(expense.amount);
-                dayIncludedCount++;
+
+                dayTotal += Number(expense.amount);
+
             }
+
         });
 
-        // Update day header with actual subtotal (only included)
-        dayHeader.lastElementChild.textContent = `Day Total: ${formatINR(dayTotal)}`;
+        dayHeader.lastElementChild.textContent =
+            `Day Total: ${formatINR(dayTotal)}`;
+
         overallTotal += dayTotal;
+
     });
 
-    // Overall total (only included)
     totalEl.innerHTML = `Overall Total: ${formatINR(overallTotal)}`;
-    totalEl.classList.toggle('warning', overallTotal > 100000); // Warning over ₹1,00,000
+
+    document.getElementById("totalExpenses").textContent = formatINR(overallTotal);
+    document.getElementById("transactionCount").textContent = filteredEntries.length;
+
+    renderChart();
+
 }
 
-// Add or update expense
+// CHART
+function renderChart() {
+
+    const monthly = {};
+
+    Object.values(allExpenses).forEach(e => {
+
+        const month = new Date(e.date).toLocaleString('default', {
+            month: 'short',
+            year: 'numeric'
+        });
+
+        if (!monthly[month]) monthly[month] = 0;
+
+        if (!e.excludeFromTotal) {
+
+            monthly[month] += Number(e.amount);
+
+        }
+
+    });
+
+    const labels = Object.keys(monthly);
+    const data = Object.values(monthly);
+
+    const ctx = document.getElementById("expenseChart");
+
+    if (expenseChart) expenseChart.destroy();
+
+    expenseChart = new Chart(ctx, {
+
+        type: "bar",
+
+        data: {
+
+            labels: labels,
+
+            datasets: [{
+
+                label: "Monthly Expenses",
+
+                data: data
+
+            }]
+
+        }
+
+    });
+
+}
+
+// ADD / UPDATE
 form.addEventListener('submit', (e) => {
+
     e.preventDefault();
+
     const description = document.getElementById('description').value;
     const amount = parseFloat(document.getElementById('amount').value);
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
-    const excludeFromTotal = excludeCheckbox.checked; // New: Capture checkbox
 
-    if (amount <= 0) {
-        alert('Amount must be positive!');
-        return;
-    }
+    const excludeFromTotal = excludeCheckbox.checked;
 
     const expenseData = {
         description,
         amount,
         category,
         date,
-        excludeFromTotal // New: Save to Firebase
+        excludeFromTotal
     };
 
     if (editingId) {
-        // Update existing
-        update(ref(db, `expenses/${editingId}`), expenseData);
+
+        update(ref(db, `users/${auth.currentUser.uid}/expenses/${editingId}`), expenseData);
+
         editingId = null;
-        submitBtn.textContent = 'Add Expense';
-        cancelBtn.style.display = 'none';
-        editIdInput.value = '';
+
+        submitBtn.textContent = "Add Expense";
+
     } else {
-        // Add new
+
         push(expensesRef, expenseData);
+
     }
 
     form.reset();
-    excludeCheckbox.checked = false; // Reset checkbox
+
 });
 
-// Cancel edit
-cancelBtn.addEventListener('click', () => {
-    editingId = null;
-    submitBtn.textContent = 'Add Expense';
-    cancelBtn.style.display = 'none';
-    editIdInput.value = '';
-    form.reset();
-    excludeCheckbox.checked = false; // New: Reset checkbox
-});
-
-// Edit expense
+// EDIT
 window.editExpense = (id) => {
+
     const expense = allExpenses[id];
-    if (expense) {
-        document.getElementById('description').value = expense.description;
-        document.getElementById('amount').value = expense.amount;
-        document.getElementById('category').value = expense.category;
-        document.getElementById('date').value = expense.date;
-        excludeCheckbox.checked = expense.excludeFromTotal || false; // New: Pre-populate checkbox
-        editingId = id;
-        editIdInput.value = id;
-        submitBtn.textContent = 'Update Expense';
-        cancelBtn.style.display = 'block';
-        form.scrollIntoView({ behavior: 'smooth' });
-    }
+
+    document.getElementById('description').value = expense.description;
+    document.getElementById('amount').value = expense.amount;
+    document.getElementById('category').value = expense.category;
+    document.getElementById('date').value = expense.date;
+
+    excludeCheckbox.checked = expense.excludeFromTotal || false;
+
+    editingId = id;
+
 };
 
-// Delete expense
+// DELETE
 window.deleteExpense = (id) => {
-    if (confirm('Are you sure you want to delete this expense?')) {
-        remove(ref(db, `expenses/${id}`));
+
+    if (confirm("Delete this expense?")) {
+
+        remove(ref(db, `users/${auth.currentUser.uid}/expenses/${id}`));
+
     }
+
 };
 
-// Filter change
+// FILTER
 filterCategory.addEventListener('change', renderExpenses);
-
-// New: Toggle change listener
 includeExcluded.addEventListener('change', renderExpenses);
 
-// Set default date to today
+// EXPORT EXCEL
+document.getElementById("exportExcelBtn").addEventListener("click", () => {
+
+    const rows = [];
+
+    Object.values(allExpenses).forEach(exp => {
+
+        rows.push({
+            Description: exp.description,
+            Amount: exp.amount,
+            Category: exp.category,
+            Date: exp.date,
+            Excluded: exp.excludeFromTotal ? "Yes" : "No"
+        });
+
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
+
+    XLSX.writeFile(workbook, "expenses.xlsx");
+
+});
+
+// Default date
 document.getElementById('date').valueAsDate = new Date();
