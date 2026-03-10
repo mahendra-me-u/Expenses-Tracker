@@ -25,17 +25,14 @@
     <div class="container" id="appContainer" style="display:none;">
 
             <header>
+                <div class="user-panel"></div>
                 <h1>Expenses Tracker</h1>
                 <p>Track your spending with ease</p>
+                <span id="userEmail"></span>
 
                 <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
             </header>
-            
-    <div class="container">
-        <header>
-            <h1>Expenses Tracker</h1>
-            <p>Track your spending with ease</p>
-        </header>
 
         <form id="expenseForm" class="form">
             <input type="hidden" id="editId">
@@ -91,11 +88,33 @@
                 <option value="Other">Other</option>
             </select>
 
+            <button id="exportExcelBtn">Export Excel</button>
+
             <!-- New: Toggle for including excluded expenses -->
             <label class="toggle-label">
                 <input type="checkbox" id="includeExcluded" checked> Include excluded in totals
             </label>
+
         </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h3>Total Expenses</h3>
+                <p id="totalExpenses">₹0</p>
+            </div>
+
+            <div class="card">
+                <h3>This Month</h3>
+                <p id="monthlyExpenses">₹0</p>
+            </div>
+
+            <div class="card">
+                <h3>Transactions</h3>
+                <p id="transactionCount">0</p>
+            </div>
+        </div>
+        
+        <canvas id="expenseChart"></canvas>
 
         <div id="expensesList" class="expenses-list">
             <h2>Expenses</h2>
@@ -105,7 +124,11 @@
     </div>
 
     <!-- Firebase SDKs -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <script type="module" src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 </body>
 
 </html>
