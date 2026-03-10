@@ -6,7 +6,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 
 // Firebase config
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyAR8V6aQGy0mzg5DtgToqtVbv7w-wR724o",
     authDomain: "expenses-tracker-50131.firebaseapp.com",
     databaseURL: "https://expenses-tracker-50131-default-rtdb.firebaseio.com",
     projectId: "expenses-tracker-50131",
