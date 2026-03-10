@@ -10,7 +10,7 @@ const firebaseConfig = {
     authDomain: "expenses-tracker-50131.firebaseapp.com",
     databaseURL: "https://expenses-tracker-50131-default-rtdb.firebaseio.com",
     projectId: "expenses-tracker-50131",
-    storageBucket: "expenses-tracker-50131.appspot.com",
+    storageBucket: "expenses-tracker-50131.firebasestorage.app",
     messagingSenderId: "339264912432",
     appId: "1:339264912432:web:0099f196b3b03f84cb81f5",
     measurementId: "G-QEBCHXY4EV"
