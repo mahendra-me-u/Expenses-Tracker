@@ -4,131 +4,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Expenses Tracker</title>
+
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="login.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 </head>
 
 <body>
-    <body>
 
-        <!-- LOGIN SCREEN -->
+    <!-- LOGIN SCREEN -->
+
     <div id="loginScreen" class="login-container">
+
         <div class="login-box">
+
             <h2>Expenses Tracker</h2>
             <p>Please login to continue</p>
 
-                <button id="googleLoginBtn">Login with Google</button>
+            <button id="googleLoginBtn">
+                Login with Google
+            </button>
+
         </div>
+
     </div>
 
-        <!-- MAIN APP -->
+
+    <!-- MAIN APP -->
+
     <div class="container" id="appContainer" style="display:none;">
 
-            <header>
-                <div class="user-panel"></div>
-                <h1>Expenses Tracker</h1>
-                <p>Track your spending with ease</p>
+        <header>
+
+            <div class="user-panel">
+
                 <span id="userEmail"></span>
 
-                <button id="logoutBtn" class="logout-btn">Logout</button>
-                </div>
-            </header>
+                <button id="logoutBtn" class="logout-btn">
+                    Logout
+                </button>
+
+            </div>
+
+            <h1>Expenses Tracker</h1>
+            <p>Track your spending with ease</p>
+
+        </header>
+
 
         <form id="expenseForm" class="form">
+
             <input type="hidden" id="editId">
 
             <div class="form-group">
-                <label for="description">Description:</label>
+
+                <label>Description</label>
                 <input type="text" id="description" required>
+
             </div>
 
-            <div class="form-group">
-                <label for="amount">Amount (₹):</label>
-                <input type="number" id="amount" step="0.01" min="0" required>
-            </div>
 
             <div class="form-group">
-                <label for="category">Category:</label>
-                <select id="category" required>
-                    <option value="">Select Category</option>
+
+                <label>Amount (₹)</label>
+                <input type="number" id="amount" step="0.01" required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Category</label>
+
+                <select id="category">
+
+                    <option value="">Select</option>
                     <option value="Food">Food</option>
                     <option value="Transport">Transport</option>
                     <option value="Entertainment">Entertainment</option>
                     <option value="Utilities">Utilities</option>
                     <option value="Other">Other</option>
+
                 </select>
+
             </div>
+
 
             <div class="form-group">
-                <label for="date">Date:</label>
+
+                <label>Date</label>
                 <input type="date" id="date" required>
+
             </div>
 
-            <!-- New: Exclude from totals checkbox -->
+
             <div class="form-group checkbox-group">
+
                 <label class="checkbox-label">
-                    <input type="checkbox" id="excludeFromTotal"> Exclude from totals? (e.g., refunds, transfers)
+
+                    <input type="checkbox" id="excludeFromTotal">
+                    Exclude from totals
+
                 </label>
+
             </div>
+
 
             <div class="form-actions">
-                <button type="submit" id="submitBtn">Add Expense</button>
-                <button type="button" id="cancelBtn" style="display: none;">Cancel Edit</button>
+
+                <button type="submit" id="submitBtn">
+                    Add Expense
+                </button>
+
+                <button type="button" id="cancelBtn" style="display:none;">
+                    Cancel
+                </button>
+
             </div>
+
         </form>
 
+
         <div class="filters">
-            <label for="filterCategory">Filter by Category:</label>
+
             <select id="filterCategory">
+
                 <option value="">All Categories</option>
                 <option value="Food">Food</option>
                 <option value="Transport">Transport</option>
                 <option value="Entertainment">Entertainment</option>
                 <option value="Utilities">Utilities</option>
                 <option value="Other">Other</option>
+
             </select>
 
-            <button id="exportExcelBtn">Export Excel</button>
+            <button id="exportExcelBtn">
+                Export Excel
+            </button>
 
-            <!-- New: Toggle for including excluded expenses -->
             <label class="toggle-label">
-                <input type="checkbox" id="includeExcluded" checked> Include excluded in totals
+
+                <input type="checkbox" id="includeExcluded" checked>
+                Include excluded
+
             </label>
 
         </div>
 
+
         <div class="dashboard">
+
             <div class="card">
+
                 <h3>Total Expenses</h3>
                 <p id="totalExpenses">₹0</p>
+
             </div>
 
             <div class="card">
-                <h3>This Month</h3>
-                <p id="monthlyExpenses">₹0</p>
-            </div>
 
-            <div class="card">
                 <h3>Transactions</h3>
                 <p id="transactionCount">0</p>
+
             </div>
+
         </div>
-        
+
+
         <canvas id="expenseChart"></canvas>
 
+
         <div id="expensesList" class="expenses-list">
+
             <h2>Expenses</h2>
+
             <div id="groupedList"></div>
-            <div class="total" id="total">Overall Total: ₹0.00</div>
+
+            <div class="total" id="total">
+                Overall Total: ₹0
+            </div>
+
         </div>
+
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    <script type="module" src="script.js"></script>
-   
 
+    <script type="module" src="script.js"></script>
 
 </body>
 
